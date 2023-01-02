@@ -1,0 +1,44 @@
+import fs from 'fs';
+
+const getIP = function getIP(req) {
+  const ip = req.headers['x-forwarded-for'] ||
+    //req.headers['x-real-ip'] ||
+    req.connection.remoteAddress ||
+    req.socket.remoteAddress ||
+    req.connection.socket.remoteAddress;
+
+  return ip;
+}
+
+//s3 사용, 로그 적재 
+const httpLogger = function httpLogger(req, res, next) {
+  const ip = getIP(req);
+  const date = new Date();
+
+
+  next();
+};
+
+// Authentication 
+const auth = function auth(req, res, next) {
+  next();
+};
+
+export { httpLogger, auth };
+
+//// data parse
+// module.exports.JSONParser = function JSONParser(req, res, next) {
+  // let body = '';
+  // req.on('data', (data) => {
+  //   body += data;
+  //   console.log("body", body);3
+  // })
+
+  // req.on('end', () => {
+  //   console.log("end");
+  //   req.body = JSON.parse(body);
+  //   console.log(req.body);
+  //   next();
+  // })
+// };
+

@@ -1,10 +1,13 @@
 import main from './app/main.js';
 import birds from './app/birds.js';
-import { httpLogger, auth } from './bunddle/middle.js'
+import envSave from './app/envSave/getData.js';
+import { httpLogger, auth } from './bunddle/middle.js';
 import express from 'express';
+import WebSocketServer from 'ws';
+import * as mqtt from "mqtt"
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 4020;
 
 // middelwares
 // app.use(cors);
@@ -20,9 +23,9 @@ app.use(httpLogger);
 
 // routing
 // app.use('/', main);
-// app.use('/', envSave);
 // middle.JSONParser();
-app.use('/birds', birds);
+// app.use('/birds', birds);
+app.use('/', envSave);
 
 app.post('/post', (req, res) => {
   const body = req.body;
@@ -31,6 +34,33 @@ app.post('/post', (req, res) => {
   res.send("HIHI");
 })
 
-app.listen(port, () => {
+const HTTPServer = app.listen(port, () => {
   console.log(`server is listening at localhost: ${port}`);
+})
+
+// make websocket 
+const webSocketServer = new WebSocketServer.Server({
+  server: HTTPServer
+});
+
+// const webSocketList = new Set();
+
+webSocketServer.on('connection', (ws, req) => {
+  // webSocketList.add(ws);
+  console.log(ws._socket.remoteAddress);
+  console.log(ws);
+  ws.on('message', (msg) => {
+    console.log(`${msg}`);
+  })
+})
+
+const client = mqtt.connect("mqtt://lms.nexton.ag:1883");
+
+client.publish('test', JSON.stringify({
+  ts: new Date(),
+  value: 'hello mqtt'
+}))
+
+client.on('message', (topic, message) => {
+  console.log()
 })
